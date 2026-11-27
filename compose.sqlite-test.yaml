@@ -1,0 +1,12 @@
+services:
+  chartdb-sqlite-test:
+    image: ${CHARTDB_TEST_IMAGE:-ghcr.io/dotstudent/chartdb:feature-sqlite-file-import}
+    container_name: chartdb-sqlite-test
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8086:80'
+    environment:
+      DISABLE_ANALYTICS: 'true'
+      HIDE_CHARTDB_CLOUD: 'true'
+    security_opt:
+      - no-new-privileges:true

@@ -31,8 +31,10 @@ export const createFieldsFromMetadata = ({
         (a, b) => a.ordinal_position - b.ordinal_position
     );
 
-    const tablePrimaryKeysColumns = tablePrimaryKeys.map((pk) =>
-        pk.column.trim()
+    const tablePrimaryKeysColumns = new Set(
+        tablePrimaryKeys.map(({ column }) =>
+            uniqueColumns.has(column) ? column : column.trim()
+        )
     );
 
     return sortedColumns.map((col: ColumnInfo): DBField => {
@@ -57,7 +59,7 @@ export const createFieldsFromMetadata = ({
             id: generateId(),
             name: col.name,
             type: finalType,
-            primaryKey: tablePrimaryKeysColumns.includes(col.name),
+            primaryKey: tablePrimaryKeysColumns.has(col.name),
             unique: Object.values(aggregatedIndexes).some(
                 (idx) =>
                     idx.unique &&

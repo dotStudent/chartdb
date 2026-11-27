@@ -39,7 +39,7 @@ export const loadFromDatabaseMetadata = async ({
     });
 
     const dependencies = await createDependenciesFromMetadata({
-        views,
+        views: views?.filter((view) => view.view_definition),
         tables,
         databaseType,
     });
