@@ -22,7 +22,12 @@ export interface ImportDatabaseDialogProps extends BaseDialogProps {
     initialImportMethod?: ImportMethod;
 }
 
-const defaultImportMethods: ImportMethod[] = ['query', 'ddl', 'dbml'];
+const defaultImportMethods: ImportMethod[] = [
+    'query',
+    'ddl',
+    'dbml',
+    'sqlite-file',
+];
 
 export const ImportDatabaseDialog: React.FC<ImportDatabaseDialogProps> = ({
     dialog,
@@ -81,6 +86,7 @@ export const ImportDatabaseDialog: React.FC<ImportDatabaseDialogProps> = ({
                 databaseType,
                 databaseMetadata,
                 databaseEdition:
+                    importMethod === 'sqlite-file' ||
                     databaseEdition?.trim().length === 0
                         ? undefined
                         : databaseEdition,

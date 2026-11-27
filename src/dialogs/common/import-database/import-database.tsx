@@ -42,6 +42,7 @@ import {
     type ValidationResult,
 } from '@/lib/data/sql-import/sql-validator';
 import { SQLValidationStatus } from './sql-validation-status';
+import { SQLiteFileInput } from './sqlite-file-input';
 import { setupDBMLLanguage } from '@/components/code-snippet/languages/dbml-language';
 import type { ImportMethod } from '@/lib/import-method/import-method';
 import { detectImportMethod } from '@/lib/import-method/detect-import-method';
@@ -131,7 +132,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
     // Check if the ddl or dbml is valid
     useEffect(() => {
         clearDecorations();
-        if (importMethod === 'query') {
+        if (importMethod === 'query' || importMethod === 'sqlite-file') {
             setSqlValidation(null);
             setShowAutoFixButton(false);
             return;
@@ -288,11 +289,14 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
         }
     }, [scriptResult, importMethod, jsonCheckAttempts]);
 
+    const importDisabled =
+        scriptResult.trim().length === 0 ||
+        (importMethod !== 'sqlite-file' &&
+            (errorMessage.length > 0 || isAutoFixing));
+
     const handleImport = useCallback(() => {
-        if (errorMessage.length === 0 && scriptResult.trim().length !== 0) {
-            onImport();
-        }
-    }, [errorMessage.length, onImport, scriptResult]);
+        if (!importDisabled) onImport();
+    }, [importDisabled, onImport]);
 
     const handleAutoFix = useCallback(() => {
         if (sqlValidation?.fixedSQL) {
@@ -342,6 +346,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
 
     const handleInputChange: OnChange = useCallback(
         (inputValue) => {
+            if (importMethod === 'sqlite-file') return;
             setScriptResult(inputValue ?? '');
 
             // Automatically open SSMS info when input length is exactly 65535
@@ -349,7 +354,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
                 setShowSSMSInfoDialog(true);
             }
         },
-        [setScriptResult]
+        [importMethod, setScriptResult]
     );
 
     const debouncedHandleInputChange = useDebounce(handleInputChange, 500);
@@ -544,9 +549,10 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
                     </Suspense>
                 </div>
 
-                {errorMessage ||
-                ((importMethod === 'ddl' || importMethod === 'dbml') &&
-                    sqlValidation) ? (
+                {importMethod !== 'sqlite-file' &&
+                (errorMessage ||
+                    ((importMethod === 'ddl' || importMethod === 'dbml') &&
+                        sqlValidation)) ? (
                     <SQLValidationStatus
                         validation={sqlValidation}
                         errorMessage={errorMessage}
@@ -573,7 +579,12 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
     const renderContent = useCallback(() => {
         return (
             <DialogInternalContent>
-                {isDesktop ? (
+                {importMethod === 'sqlite-file' ? (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        {renderInstructions()}
+                        <SQLiteFileInput onResult={setScriptResult} />
+                    </div>
+                ) : isDesktop ? (
                     <ResizablePanelGroup
                         direction={isDesktop ? 'horizontal' : 'vertical'}
                         className="min-h-[500px]"
@@ -599,7 +610,13 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
                 )}
             </DialogInternalContent>
         );
-    }, [renderOutputTextArea, renderInstructions, isDesktop]);
+    }, [
+        renderOutputTextArea,
+        renderInstructions,
+        isDesktop,
+        importMethod,
+        setScriptResult,
+    ]);
 
     const renderFooter = useCallback(() => {
         return (
@@ -614,7 +631,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
                             {t('new_diagram_dialog.back')}
                         </Button>
                     )}
-                    {isDesktop ? (
+                    {isDesktop && importMethod !== 'sqlite-file' ? (
                         <ZoomableImage src="/load-new-db-instructions.gif">
                             <Button type="button" variant="link">
                                 {t(
@@ -637,7 +654,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
                         </DialogClose>
                     )}
 
-                    {showCheckJsonButton ? (
+                    {importMethod === 'query' && showCheckJsonButton ? (
                         <Button
                             type="button"
                             variant="default"
@@ -670,11 +687,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
                         <Button
                             type="button"
                             variant="default"
-                            disabled={
-                                scriptResult.trim().length === 0 ||
-                                errorMessage.length > 0 ||
-                                isAutoFixing
-                            }
+                            disabled={importDisabled}
                             onClick={handleImport}
                         >
                             {t('new_diagram_dialog.import')}
@@ -684,11 +697,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
                             <Button
                                 type="button"
                                 variant="default"
-                                disabled={
-                                    scriptResult.trim().length === 0 ||
-                                    errorMessage.length > 0 ||
-                                    isAutoFixing
-                                }
+                                disabled={importDisabled}
                                 onClick={handleImport}
                             >
                                 {t('new_diagram_dialog.import')}
@@ -696,7 +705,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
                         </DialogClose>
                     )}
 
-                    {!isDesktop ? (
+                    {!isDesktop && importMethod !== 'sqlite-file' ? (
                         <ZoomableImage src="/load-new-db-instructions.gif">
                             <Button type="button" variant="link">
                                 {t(
@@ -713,8 +722,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
         isDesktop,
         keepDialogAfterImport,
         onCreateEmptyDiagram,
-        errorMessage.length,
-        scriptResult,
+        importDisabled,
         showCheckJsonButton,
         isCheckingJson,
         handleCheckJson,

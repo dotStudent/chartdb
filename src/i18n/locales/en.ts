@@ -2,6 +2,18 @@ import type { LanguageMetadata } from '../types';
 
 export const en = {
     translation: {
+        sqlite_file: {
+            label: 'SQLite File',
+            choose: 'Choose SQLite file',
+            drop: 'Drop a .db, .sqlite or .sqlite3 file here.',
+            local: 'ChartDB reads the database schema in this browser.',
+            loading: 'Reading SQLite schema…',
+            ready: 'Schema loaded. Select Import to add it to the diagram.',
+            empty: 'The database has no importable tables or views.',
+            invalid: 'This file is not a valid or supported SQLite database.',
+            failed: 'Could not read the file or start SQLite. Try again.',
+            too_large: 'Choose a SQLite file no larger than 128 MiB.',
+        },
         editor_sidebar: {
             new_diagram: 'New',
             browse: 'Open',

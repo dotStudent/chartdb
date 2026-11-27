@@ -207,6 +207,19 @@ export const Menu: React.FC<MenuProps> = () => {
                             >
                                 DBML
                             </MenubarItem>
+                            {(databaseType === DatabaseType.SQLITE ||
+                                databaseType === DatabaseType.GENERIC) && (
+                                <MenubarItem
+                                    onClick={() =>
+                                        openImportDatabaseDialog({
+                                            databaseType: DatabaseType.SQLITE,
+                                            initialImportMethod: 'sqlite-file',
+                                        })
+                                    }
+                                >
+                                    {t('sqlite_file.label')}
+                                </MenubarItem>
+                            )}
                         </MenubarSubContent>
                     </MenubarSub>
                     <MenubarSeparator />

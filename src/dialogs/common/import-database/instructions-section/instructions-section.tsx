@@ -15,7 +15,7 @@ import {
     AvatarImage,
 } from '@/components/avatar/avatar';
 import { useTranslation } from 'react-i18next';
-import { Code, FileCode } from 'lucide-react';
+import { Code, FileCode, FileUp } from 'lucide-react';
 import { SmartQueryInstructions } from './instructions/smart-query-instructions';
 import { DDLInstructions } from './instructions/ddl-instructions';
 import { DBMLInstructions } from './instructions/dbml-instructions';
@@ -39,7 +39,12 @@ export interface InstructionsSectionProps {
     importMethods?: ImportMethod[];
 }
 
-const defaultImportMethods: ImportMethod[] = ['query', 'ddl', 'dbml'];
+const defaultImportMethods: ImportMethod[] = [
+    'query',
+    'ddl',
+    'dbml',
+    'sqlite-file',
+];
 
 export const InstructionsSection: React.FC<InstructionsSectionProps> = ({
     databaseType,
@@ -66,9 +71,14 @@ export const InstructionsSection: React.FC<InstructionsSectionProps> = ({
         [importMethods]
     );
 
+    const showSQLiteFile =
+        databaseType === DatabaseType.SQLITE &&
+        importMethods.includes('sqlite-file');
+
     return (
         <div className="flex w-full flex-1 flex-col gap-4">
             {showSmartQuery &&
+            importMethod !== 'sqlite-file' &&
             databaseTypeToEditionMap[databaseType].length > 0 ? (
                 <div className="flex flex-col gap-1">
                     <p className="text-sm leading-6 text-primary">
@@ -144,12 +154,7 @@ export const InstructionsSection: React.FC<InstructionsSectionProps> = ({
                     className="ml-1 flex-wrap justify-start gap-2"
                     value={importMethod}
                     onValueChange={(value) => {
-                        let selectedImportMethod: ImportMethod = 'query';
-                        if (value) {
-                            selectedImportMethod = value as ImportMethod;
-                        }
-
-                        setImportMethod(selectedImportMethod);
+                        if (value) setImportMethod(value as ImportMethod);
                     }}
                 >
                     {showSmartQuery && (
@@ -192,30 +197,46 @@ export const InstructionsSection: React.FC<InstructionsSectionProps> = ({
                             DBML
                         </ToggleGroupItem>
                     )}
+                    {showSQLiteFile && (
+                        <ToggleGroupItem
+                            value="sqlite-file"
+                            variant="outline"
+                            className="h-6 gap-1 p-0 px-2 shadow-none data-[state=on]:bg-slate-200 dark:data-[state=on]:bg-slate-700"
+                        >
+                            <FileUp size={16} />
+                            {t('sqlite_file.label')}
+                        </ToggleGroupItem>
+                    )}
                 </ToggleGroup>
             </div>
 
-            <div className="flex flex-col gap-2">
-                <div className="text-sm font-semibold">Instructions:</div>
-                {importMethod === 'query' && showSmartQuery ? (
-                    <SmartQueryInstructions
-                        databaseType={databaseType}
-                        databaseEdition={databaseEdition}
-                        showSSMSInfoDialog={showSSMSInfoDialog}
-                        setShowSSMSInfoDialog={setShowSSMSInfoDialog}
-                    />
-                ) : importMethod === 'ddl' ? (
-                    <DDLInstructions
-                        databaseType={databaseType}
-                        databaseEdition={databaseEdition}
-                    />
-                ) : (
-                    <DBMLInstructions
-                        databaseType={databaseType}
-                        databaseEdition={databaseEdition}
-                    />
-                )}
-            </div>
+            {importMethod === 'sqlite-file' ? (
+                <p className="text-sm text-muted-foreground">
+                    {t('sqlite_file.local')}
+                </p>
+            ) : (
+                <div className="flex flex-col gap-2">
+                    <div className="text-sm font-semibold">Instructions:</div>
+                    {importMethod === 'query' && showSmartQuery ? (
+                        <SmartQueryInstructions
+                            databaseType={databaseType}
+                            databaseEdition={databaseEdition}
+                            showSSMSInfoDialog={showSSMSInfoDialog}
+                            setShowSSMSInfoDialog={setShowSSMSInfoDialog}
+                        />
+                    ) : importMethod === 'ddl' ? (
+                        <DDLInstructions
+                            databaseType={databaseType}
+                            databaseEdition={databaseEdition}
+                        />
+                    ) : (
+                        <DBMLInstructions
+                            databaseType={databaseType}
+                            databaseEdition={databaseEdition}
+                        />
+                    )}
+                </div>
+            )}
         </div>
     );
 };

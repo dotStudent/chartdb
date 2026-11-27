@@ -2,6 +2,19 @@ import type { LanguageMetadata, LanguageTranslation } from '../types';
 
 export const de: LanguageTranslation = {
     translation: {
+        sqlite_file: {
+            label: 'SQLite-Datei',
+            choose: 'SQLite-Datei auswählen',
+            drop: 'Eine .db-, .sqlite- oder .sqlite3-Datei hier ablegen.',
+            local: 'ChartDB liest das Datenbankschema in diesem Browser.',
+            loading: 'SQLite-Schema wird gelesen …',
+            ready: 'Schema geladen. Wähle Importieren, um es zum Diagramm hinzuzufügen.',
+            empty: 'Die Datenbank enthält keine importierbaren Tabellen oder Ansichten.',
+            invalid:
+                'Diese Datei ist keine gültige oder unterstützte SQLite-Datenbank.',
+            failed: 'Die Datei konnte nicht gelesen oder SQLite nicht gestartet werden. Versuche es erneut.',
+            too_large: 'Wähle eine SQLite-Datei mit höchstens 128 MiB.',
+        },
         editor_sidebar: {
             new_diagram: 'Neu',
             browse: 'Öffnen',

@@ -69,6 +69,7 @@ export const SelectTables: React.FC<SelectTablesProps> = ({
 
         // Add regular tables
         databaseMetadata?.tables.forEach((table) => {
+            if (table.type === 'view') return;
             const schema = schemaNameToDomainSchemaName(table.schema);
             const tableName = table.table;
 

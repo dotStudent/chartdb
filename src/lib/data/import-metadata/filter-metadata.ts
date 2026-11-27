@@ -39,7 +39,9 @@ export function filterMetadataByTables({
     const filteredTables = metadata.tables.filter((table) => {
         const schema = schemaNameToDomainSchemaName(table.schema) ?? '';
         const tableId = `${schema}.${table.table}`;
-        return selectedTableSet.has(tableId);
+        return table.type === 'view'
+            ? selectedViewSet.has(tableId)
+            : selectedTableSet.has(tableId);
     });
 
     // Filter views - include views that were explicitly selected

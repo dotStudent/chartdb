@@ -121,6 +121,7 @@ export const CreateDiagramDialog: React.FC<CreateDiagramDialogProps> = ({
                     databaseMetadata: metadata,
                     diagramNumber,
                     databaseEdition:
+                        importMethod === 'sqlite-file' ||
                         databaseEdition?.trim().length === 0
                             ? undefined
                             : databaseEdition,
@@ -198,7 +199,10 @@ export const CreateDiagramDialog: React.FC<CreateDiagramDialogProps> = ({
                 );
 
                 const totalTablesAndViews =
-                    metadata.tables.length + (metadata.views?.length || 0);
+                    importMethod === 'sqlite-file'
+                        ? metadata.tables.length
+                        : metadata.tables.length +
+                          (metadata.views?.length || 0);
 
                 setParsedMetadata(metadata);
 
